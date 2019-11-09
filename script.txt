@@ -17,4 +17,8 @@ python src/align/align_dataset_mtcnn.py \
 --gpu_memory_fraction 0.25 \
 & done
 
-python src/classifier.py TRAIN /Users/xqu/datasets/lfw/lfw_mtcnnalign_160 ./pretrain/20180402-114759.pb ./mymodels/lfw_classifier.pkl --batch_size 32 --min_nrof_images_per_class 40 
+python src/classifier.py TRAIN /Users/xqu/datasets/lfw/lfw_mtcnnpy_160 /Users/xqu/datasets/pretrain/20180402-114759.pb /Users/xqu/datasets/mymodels/lfw_classifier.pkl --batch_size 10
+
+python src/classifier.py CLASSIFY /Users/xqu/datasets/lfw/lfw_mtcnnpy_160 /Users/xqu/datasets/pretrain/20180402-114759.pb /Users/xqu/datasets/mymodels/lfw_classifier.pkl --batch_size 10
+
+python myclassifier.py TRAIN /Users/xqu/datasets/lfw/lfw_mtcnnpy_160 /Users/xqu/datasets/pretrain/20180402-114759.pb /Users/xqu/datasets/mymodels/lfw_classifier.pkl --batch_size 10
