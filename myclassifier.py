@@ -81,13 +81,17 @@ def main(args):
             nrof_images = len(paths)
             nrof_batches_per_epoch = int(math.ceil(1.0*nrof_images / args.batch_size))   
 
+            # save augmented images
             augment_emb_array = []
             augment_label = []
 
             def append_augment_emb_array(add_augment):
                 # Run forward pass to calculate embeddings
-                print('\nCalculating features for images')
-
+                # and append embeddings to augment_emb_array
+                if add_augment:
+                    print('Calculating features for AUGMENTED images')
+                else:
+                    print('Calculating features for images')
 
                 emb_array = np.zeros((nrof_images, embedding_size))
                 for i in range(nrof_batches_per_epoch):
@@ -102,18 +106,20 @@ def main(args):
                 augment_emb_array.append(emb_array)
                 augment_label.extend(labels)
 
+            #first use the original images
             append_augment_emb_array(False)
-            append_augment_emb_array(True)
+            for _ in range(args.augment_times):
+                append_augment_emb_array(True)
 
             augment_emb_array = np.concatenate(augment_emb_array)
-            print(augment_emb_array.shape)
-            print(augment_label,len(augment_label))
+            # print(augment_emb_array.shape)
+            # print(augment_label,len(augment_label))
 
             classifier_filename_exp = os.path.expanduser(args.classifier_filename)
 
             if (args.mode=='TRAIN'):
                 # Train classifier
-                print('\nTraining classifier')
+                print('\nTraining classifier......')
                 model = SVC(kernel='linear', probability=True)
                 model.fit(augment_emb_array, augment_label)
             
@@ -144,18 +150,6 @@ def main(args):
                 print('Accuracy: %.3f' % accuracy)
                 
             
-def split_dataset(dataset, min_nrof_images_per_class, nrof_train_images_per_class):
-    train_set = []
-    test_set = []
-    for cls in dataset:
-        paths = cls.image_paths
-        # Remove classes with less than min_nrof_images_per_class
-        if len(paths)>=min_nrof_images_per_class:
-            np.random.shuffle(paths)
-            train_set.append(facenet.ImageClass(cls.name, paths[:nrof_train_images_per_class]))
-            test_set.append(facenet.ImageClass(cls.name, paths[nrof_train_images_per_class:]))
-    return train_set, test_set
-
             
 def parse_arguments(argv):
     parser = argparse.ArgumentParser()
@@ -181,6 +175,8 @@ def parse_arguments(argv):
         help='Image size (height, width) in pixels.', default=160)
     parser.add_argument('--seed', type=int,
         help='Random seed.', default=666)
+    parser.add_argument('--augment_times', type=int,
+        help='Image augmentation times', default=6)
     parser.add_argument('--min_nrof_images_per_class', type=int,
         help='Only include classes with at least this number of images in the dataset', default=20)
     parser.add_argument('--nrof_train_images_per_class', type=int,
