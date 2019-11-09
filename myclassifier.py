@@ -35,6 +35,9 @@ import sys
 import math
 import pickle
 from sklearn.svm import SVC
+import random
+
+
 
 def main(args):
   
@@ -74,27 +77,45 @@ def main(args):
             embeddings = tf.compat.v1.get_default_graph().get_tensor_by_name("embeddings:0")
             phase_train_placeholder = tf.compat.v1.get_default_graph().get_tensor_by_name("phase_train:0")
             embedding_size = embeddings.get_shape()[1]
-            
-            # Run forward pass to calculate embeddings
-            print('\nCalculating features for images')
+
             nrof_images = len(paths)
-            nrof_batches_per_epoch = int(math.ceil(1.0*nrof_images / args.batch_size))
-            emb_array = np.zeros((nrof_images, embedding_size))
-            for i in range(nrof_batches_per_epoch):
-                start_index = i*args.batch_size
-                end_index = min((i+1)*args.batch_size, nrof_images)
-                paths_batch = paths[start_index:end_index]
-                images = facenet.load_data(paths_batch, False, False, args.image_size)
-                feed_dict = { images_placeholder:images, phase_train_placeholder:False }
-                emb_array[start_index:end_index,:] = sess.run(embeddings, feed_dict=feed_dict)
-            
+            nrof_batches_per_epoch = int(math.ceil(1.0*nrof_images / args.batch_size))   
+
+            augment_emb_array = []
+            augment_label = []
+
+            def append_augment_emb_array(add_augment):
+                # Run forward pass to calculate embeddings
+                print('\nCalculating features for images')
+
+
+                emb_array = np.zeros((nrof_images, embedding_size))
+                for i in range(nrof_batches_per_epoch):
+                    start_index = i*args.batch_size
+                    end_index = min((i+1)*args.batch_size, nrof_images)
+                    paths_batch = paths[start_index:end_index]
+                    # images = facenet.load_data(paths_batch, False, False, args.image_size)
+                    images = facenet.load_data_with_aug(paths_batch, add_augment, args.image_size)
+                    feed_dict = { images_placeholder:images, phase_train_placeholder:False }
+                    emb_array[start_index:end_index,:] = sess.run(embeddings, feed_dict=feed_dict)
+
+                augment_emb_array.append(emb_array)
+                augment_label.extend(labels)
+
+            append_augment_emb_array(False)
+            append_augment_emb_array(True)
+
+            augment_emb_array = np.concatenate(augment_emb_array)
+            print(augment_emb_array.shape)
+            print(augment_label,len(augment_label))
+
             classifier_filename_exp = os.path.expanduser(args.classifier_filename)
 
             if (args.mode=='TRAIN'):
                 # Train classifier
                 print('\nTraining classifier')
                 model = SVC(kernel='linear', probability=True)
-                model.fit(emb_array, labels)
+                model.fit(augment_emb_array, augment_label)
             
                 # Create a list of class names
                 class_names = [ cls.name.replace('_', ' ') for cls in dataset]
