@@ -82,6 +82,7 @@ def main(args):
                 if not os.path.exists(output_filename):
                     try:
                         img = cv2.imread(image_path)
+                        print(img.shape)
                     except (IOError, ValueError, IndexError) as e:
                         errorMessage = '{}: {}'.format(image_path, e)
                         print(errorMessage)

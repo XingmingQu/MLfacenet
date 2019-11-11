@@ -17,6 +17,17 @@ python src/align/align_dataset_mtcnn.py \
 --gpu_memory_fraction 0.25 \
 & done
 
+
+python src/align/align_dataset_mtcnn.py \
+~/datasets/mydataset \
+~/datasets/mydataset_mtcnnpy_160 \
+--image_size 160 \
+--margin 32 \
+--random_order \
+--gpu_memory_fraction 0.25 \
+
+
+
 python src/classifier.py TRAIN /Users/xqu/datasets/lfw/lfw_mtcnnpy_160 /Users/xqu/datasets/pretrain/20180402-114759.pb /Users/xqu/datasets/mymodels/lfw_classifier.pkl --batch_size 10 
 
 python src/classifier.py CLASSIFY /Users/xqu/datasets/lfw/lfw_mtcnnpy_160 /Users/xqu/datasets/pretrain/20180402-114759.pb /Users/xqu/datasets/mymodels/lfw_classifier.pkl --batch_size 10

@@ -4,7 +4,7 @@ data_folder = '/Users/xqu/datasets/lfw/lfw_mtcnnpy_160'
 face_net_model = '/Users/xqu/datasets/pretrain/20180402-114759.pb'
 output_model = '/Users/xqu/datasets/mymodels/lfw_classifier.pkl'
 batch_size = 10
-augment_times = 10
+augment_times = 20
 
 cmd = """python myclassifier.py TRAIN \
 {} \
